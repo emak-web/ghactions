@@ -1,15 +1,28 @@
-name: Build C
+name: CI Build (C)
 
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-          
+      - uses: actions/checkout@v4
+
       - name: Compile
-        run: gcc -Wall -Wextra -o app main.c
+        run: gcc -O2 -Wall -Wextra -Werror -o app main.c
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ matrix.os }}
+          path: |
+            app
